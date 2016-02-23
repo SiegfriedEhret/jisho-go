@@ -17,12 +17,30 @@ type KanjiData struct {
 	Kunyomi  string
 	Elements string
 	PartOf   string
-	Jlpt     string
+	JLPT     string
 	Strokes  int
 }
 
+func (k KanjiData) String() string {
+	return fmt.Sprintf(`
+		Kanji %s
+
+	Onyomi %s
+	Kunyomi %s
+	Strokes %d
+	Meaning %s
+	JLPT %s
+	Parts %s
+	Part of %s
+	`, k.Kanji, k.Onyomi, k.Kunyomi, k.Strokes, k.Meaning, k.JLPT, k.Elements, k.PartOf)
+}
+
 func main() {
-	fmt.Println("jisho", os.Args)
+	args := os.Args[1:]
+
+	if len(args) == 0 {
+		log.Fatal("Please give me a kanji!")
+	}
 
 	db, err := sql.Open("sqlite3", "./data/kanjidb.sqlite")
 
@@ -30,9 +48,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	KanjiData := search(db, "冥")
-
-	fmt.Println(KanjiData)
+	for i := 0; i < len(args); i++ {
+		KanjiData := search(db, args[i])
+		fmt.Println(KanjiData)
+	}
 
 	defer db.Close()
 }
@@ -55,6 +74,7 @@ func search(db *sql.DB, kanji string) KanjiData {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer rows.Close()
 
 	var kanjiData KanjiData
@@ -66,13 +86,14 @@ func search(db *sql.DB, kanji string) KanjiData {
 		rows.Scan(&kanji, &strokes, &meaning, &onyomi, &kunyomi, &elements, &partOf, &jlpt)
 
 		kanjiData = KanjiData{kanji, meaning, onyomi, kunyomi, elements, partOf, jlpt, strokes}
-
 	}
 
 	return kanjiData
 }
 
 /*
+From https://gitlab.com/SiegfriedEhret/jisho
+
 function search(kanji, cb) {
   doSearch(`SELECT *
     FROM elements AS E

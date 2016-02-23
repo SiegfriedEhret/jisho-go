@@ -1,2 +1,3 @@
 #!/bin/bash
-go build -o jisho main.go
+rm -f jisho.go
+go build

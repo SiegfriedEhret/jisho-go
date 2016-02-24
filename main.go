@@ -42,6 +42,7 @@ func main() {
 		log.Fatal("Please give me a kanji!")
 	}
 
+	c := make(chan KanjiData, len(args))
 	db, err := sql.Open("sqlite3", "./data/kanjidb.sqlite")
 
 	if err != nil {
@@ -49,14 +50,23 @@ func main() {
 	}
 
 	for i := 0; i < len(args); i++ {
-		KanjiData := search(db, args[i])
-		fmt.Println(KanjiData)
+		go search(db, args[i], c)
+	}
+
+	count := 0
+	for i := range c {
+		fmt.Println(i)
+
+		count++
+		if count == len(args) {
+			return
+		}
 	}
 
 	defer db.Close()
 }
 
-func search(db *sql.DB, kanji string) KanjiData {
+func search(db *sql.DB, kanji string, c chan KanjiData) {
 	query := `SELECT
 			E.kanji,
 			E.strokes,
@@ -88,18 +98,13 @@ func search(db *sql.DB, kanji string) KanjiData {
 		kanjiData = KanjiData{kanji, meaning, onyomi, kunyomi, elements, partOf, jlpt, strokes}
 	}
 
-	return kanjiData
+	c <- kanjiData
 }
 
 /*
 From https://gitlab.com/SiegfriedEhret/jisho
 
-function search(kanji, cb) {
-  doSearch(`SELECT *
-    FROM elements AS E
-    JOIN kanjidict AS K ON E.kanji = K.kanji
-    WHERE E.kanji = '${kanji}'`, cb);
-}
+TODO:
 
 function searchSentence(kanji, cb) {
   doSearch(`SELECT *
@@ -107,9 +112,4 @@ function searchSentence(kanji, cb) {
     WHERE kanji LIKE '%${kanji}%';`, cb);
 }
 
-function doSearch(query, cb) {
-  debug('Query:', query);
-
-  db.all(query, cb);
-}
 */

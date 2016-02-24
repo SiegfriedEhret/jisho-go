@@ -4,6 +4,8 @@ Uses the [kanjium](https://github.com/mifunetoshiro/kanjium) database ([license]
 
 Not affiliated with the amazing [jisho.org](http://jisho.org/).
 
+Source code available on [Gitlab](https://gitlab.com/SiegfriedEhret/jisho.go) or [Github](https://github.com/SiegfriedEhret/jisho.go).
+
 ## install
 
 ```

@@ -1,12 +1,14 @@
 # jisho
 
+![](logo.png)
+
 Uses the [kanjium](https://github.com/mifunetoshiro/kanjium) database ([license](https://github.com/mifunetoshiro/kanjium/blob/master/LICENSE.txt)).
 
 Not affiliated with the amazing [jisho.org](http://jisho.org/).
 
 Source code available on [Gitlab](https://gitlab.com/SiegfriedEhret/jisho.go) or [Github](https://github.com/SiegfriedEhret/jisho.go).
 
-## install
+## install
 
 ```
 go install github.com/mattn/go-sqlite3

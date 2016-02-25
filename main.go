@@ -43,7 +43,7 @@ func main() {
 	}
 
 	c := make(chan KanjiData, len(args))
-	db, err := sql.Open("sqlite3", "./data/kanjidb.sqlite")
+	db, err := sql.Open("sqlite3", "./kanjidb.sqlite")
 
 	if err != nil {
 		log.Fatal(err)

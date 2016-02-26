@@ -36,6 +36,7 @@ func (k KanjiData) String() string {
 }
 
 func main() {
+	fmt.Println("jisho 辞書")
 	args := os.Args[1:]
 
 	if len(args) == 0 {

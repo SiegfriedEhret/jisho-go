@@ -6,27 +6,28 @@ Uses the [kanjium](https://github.com/mifunetoshiro/kanjium) database ([license]
 
 Not affiliated with the amazing [jisho.org](http://jisho.org/).
 
-Source code available on [Gitlab](https://gitlab.com/SiegfriedEhret/jisho.go) or [Github](https://github.com/SiegfriedEhret/jisho.go).
+Source code available on [Gitlab](https://gitlab.com/SiegfriedEhret/jisho-go) or [Github](https://github.com/SiegfriedEhret/jisho-go).
 
 ## install
 
-You need `gcc` for the installation of sqlite3.
+You need `gcc` for the installation of sqlite3 (if I remember correctly)
 
 ```
-go install github.com/mattn/go-sqlite3
-go get -u gitlab.com/SiegfriedEhret/jisho.go
+go get github.com/mattn/go-sqlite3
+
+# Then
+
+go get -u gitlab.com/SiegfriedEhret/jisho-go
+# OR
+go get -u github.com/SiegfriedEhret/jisho-go
 ```
 
 ## usage
 
-```
-./jisho.go 冥
-```
-
-You can also search multiple kanjis !
+Download the [kanjidb](./kanjidb.sqlite) file and put it somewhere.
 
 ```
-./jisho.go 冥 彩 子
+jisho-go --db=path/to/kanjidb.sqlite 彩 子
 ```
 
 ## license

@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/Sirupsen/logrus"
+	"github.com/jessevdk/go-flags"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,23 +37,41 @@ func (k KanjiData) String() string {
 	`, k.Kanji, k.Onyomi, k.Kunyomi, k.Strokes, k.Meaning, k.JLPT, k.Elements, k.PartOf)
 }
 
-func main() {
-	fmt.Println("jisho 辞書")
-	args := os.Args[1:]
+var opts struct {
+	Db   string `long:"db" description:"Path to the kanjidb.sqlite file" default:"./kanjidb.sqlite"`
+	Args struct {
+		Id     string
+		Kanjis []string
+	} `positional-args:"yes" required:"yes"`
+}
 
-	if len(args) == 0 {
+func main() {
+	_, err := flags.ParseArgs(&opts, os.Args)
+
+	if err != nil {
+		logrus.WithError(err).Fatal("Failed to read program arguments")
+	}
+
+	logrus.WithField("Db", opts.Db).Debug("Database path")
+	logrus.WithField("Kanjis", opts.Args.Kanjis).Debug("Kanjis to search")
+
+	fmt.Println("jisho 辞書")
+
+	if len(opts.Args.Kanjis) == 0 {
 		log.Fatal("Please give me a kanji!")
 	}
 
-	c := make(chan KanjiData, len(args))
-	db, err := sql.Open("sqlite3", "./kanjidb.sqlite")
+	c := make(chan KanjiData, len(opts.Args.Kanjis))
+	database, err := sql.Open("sqlite3", opts.Db)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for i := 0; i < len(args); i++ {
-		go search(db, args[i], c)
+	defer database.Close()
+
+	for i := 0; i < len(opts.Args.Kanjis); i++ {
+		go search(database, opts.Args.Kanjis[i], c)
 	}
 
 	count := 0
@@ -59,15 +79,13 @@ func main() {
 		fmt.Println(i)
 
 		count++
-		if count == len(args) {
+		if count == len(opts.Args.Kanjis) {
 			return
 		}
 	}
-
-	defer db.Close()
 }
 
-func search(db *sql.DB, kanji string, c chan KanjiData) {
+func search(database *sql.DB, kanji string, c chan KanjiData) {
 	query := `SELECT
 			E.kanji,
 			E.strokes,
@@ -81,7 +99,7 @@ func search(db *sql.DB, kanji string, c chan KanjiData) {
 		JOIN kanjidict AS K ON E.kanji = K.kanji
 		WHERE E.kanji = '` + kanji + "'"
 
-	rows, err := db.Query(query)
+	rows, err := database.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,16 +119,3 @@ func search(db *sql.DB, kanji string, c chan KanjiData) {
 
 	c <- kanjiData
 }
-
-/*
-From https://gitlab.com/SiegfriedEhret/jisho
-
-TODO:
-
-function searchSentence(kanji, cb) {
-  doSearch(`SELECT *
-    FROM sentences
-    WHERE kanji LIKE '%${kanji}%';`, cb);
-}
-
-*/
